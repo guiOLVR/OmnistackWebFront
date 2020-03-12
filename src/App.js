@@ -1,24 +1,55 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+
+import api from './services/api';
+
+/**
+ * Component: bloco isolado de HTML, CSS E JS, o qual não interfere no restante da aplicação
+ * Propriedado (props): Informações que um componemte Pai passa para o componente Filho
+ * Estado (useState): Informações mantidas pelo componente (Lembrar: imutabilidade)
+ */
+
+import './global.css';
 import './App.css';
+import './Sidebar.css';
+import './Main.css';
+import './services/api';
+
+import DevItem from './components/DevItem';
+import DevForm from './components/DevForm';
 
 function App() {
+
+  const [devs, setDevs] = useState([]);
+  
+  async function handleAddDev(data) {
+    const response = await api.post('/devs', data);
+
+    setDevs([...devs, response.data]);
+  }
+
+  useEffect(() => {
+    async function loadDevs() {
+      const response = await api.get('/devs');
+
+      setDevs(response.data);
+    }
+
+    loadDevs();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div id="app">
+      <aside>
+        <strong>Cadastrar</strong>
+        <DevForm onSubmit={handleAddDev} />
+      </aside>
+      <main>
+        <ul>
+          {devs.map(dev => (
+            <DevItem key={dev._id} dev = {dev} />
+          ))}
+        </ul>
+      </main>
     </div>
   );
 }
